@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const HYATT_ID = "11111111-1111-1111-1111-111111111111";
+const MARRIOTT_ID = "22222222-2222-2222-2222-222222222222";
 const HYATT_ROOM_ID = "cccc1ccc-cccc-cccc-cccc-000000000001";
 const HYATT_ATTENDANT_ID = "aaaa1aaa-aaaa-aaaa-aaaa-000000000001";
 const HYATT_SECOND_ATTENDANT_ID = "aaaa1aaa-aaaa-aaaa-aaaa-000000000002";
@@ -37,6 +38,19 @@ describe.sequential("RLS smoke", () => {
     const hotels = new Set((data ?? []).map((r) => r.hotel_id));
     expect(hotels.size).toBe(1);
     expect(hotels.has(HYATT_ID)).toBe(true);
+  });
+
+  it("Marriott manager sees only Marriott rooms via anon client + login", async () => {
+    const supabase = await signIn("manager-b@marriott.example");
+
+    const { data, error } = await supabase
+      .from("room_assignments")
+      .select("hotel_id");
+    expect(error).toBeNull();
+    expect(data?.length ?? 0).toBeGreaterThan(0);
+    const hotels = new Set((data ?? []).map((r) => r.hotel_id));
+    expect(hotels.size).toBe(1);
+    expect(hotels.has(MARRIOTT_ID)).toBe(true);
   });
 
   it("Hyatt manager can update a Hyatt room assignment", async () => {

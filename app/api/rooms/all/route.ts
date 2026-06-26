@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/service";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function GET() {
-  const supabase = createServiceClient();
+  const supabase = await createSupabaseServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const today = new Date().toISOString().slice(0, 10);
   const { data, error } = await supabase
     .from("room_assignments")

@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { RoomAssignment, Staff, UserHotelMembership } from "@/lib/types/database";
+import { subscribeToRoomAssignmentUpdates } from "@/lib/rooms/realtime";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { RoomCard } from "@/components/room-card";
 
 type AssignmentResponse = {
@@ -30,11 +32,11 @@ export function BoardClient({
     [memberships]
   );
 
-  function replaceRoom(updatedRoom: RoomAssignment) {
+  const replaceRoom = useCallback((updatedRoom: RoomAssignment) => {
     setRooms((currentRooms) =>
       currentRooms.map((room) => (room.id === updatedRoom.id ? updatedRoom : room))
     );
-  }
+  }, []);
 
   async function assignRoom(
     room: RoomAssignment,
@@ -79,6 +81,11 @@ export function BoardClient({
     }, 10_000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    return subscribeToRoomAssignmentUpdates(supabase, replaceRoom);
+  }, [replaceRoom]);
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

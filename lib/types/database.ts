@@ -1,5 +1,6 @@
 export type RoomStatus = "VC" | "VD" | "OC" | "OOO";
 export type RoomType = "KING" | "QUEEN" | "SUITE";
+export type HotelUserRole = "attendant" | "inspector" | "manager";
 
 export type RoomAssignment = {
   id: string;
@@ -20,5 +21,10 @@ export type Staff = {
   id: string;
   hotel_id: string;
   full_name: string;
-  role: "attendant" | "inspector" | "manager";
+  role: HotelUserRole;
+};
+
+export type UserHotelMembership = {
+  hotel_id: string;
+  role: HotelUserRole;
 };

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { createClient } from "@supabase/supabase-js";
 import { config as loadEnv } from "dotenv";
 
@@ -21,13 +20,38 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 const HYATT_ID = "11111111-1111-1111-1111-111111111111";
 const MARRIOTT_ID = "22222222-2222-2222-2222-222222222222";
 
-type SeedUser = { email: string; password: string; hotelId: string };
+type SeedUser = {
+  email: string;
+  password: string;
+  hotelId: string;
+  role: "attendant" | "inspector" | "manager";
+};
 
 const USERS: SeedUser[] = [
-  { email: "manager-a@hyatt.example", password: "password123", hotelId: HYATT_ID },
-  { email: "attendant-a@hyatt.example", password: "password123", hotelId: HYATT_ID },
-  { email: "manager-b@marriott.example", password: "password123", hotelId: MARRIOTT_ID },
-  { email: "attendant-b@marriott.example", password: "password123", hotelId: MARRIOTT_ID },
+  {
+    email: "manager-a@hyatt.example",
+    password: "password123",
+    hotelId: HYATT_ID,
+    role: "manager",
+  },
+  {
+    email: "attendant-a@hyatt.example",
+    password: "password123",
+    hotelId: HYATT_ID,
+    role: "attendant",
+  },
+  {
+    email: "manager-b@marriott.example",
+    password: "password123",
+    hotelId: MARRIOTT_ID,
+    role: "manager",
+  },
+  {
+    email: "attendant-b@marriott.example",
+    password: "password123",
+    hotelId: MARRIOTT_ID,
+    role: "attendant",
+  },
 ];
 
 function staffId(hotel: "h" | "m", idx: number) {
@@ -96,7 +120,7 @@ async function ensureUserHotelLinks() {
     const userId = await ensureAuthUser(u);
     const { error } = await admin
       .from("user_hotels")
-      .upsert({ user_id: userId, hotel_id: u.hotelId });
+      .upsert({ user_id: userId, hotel_id: u.hotelId, role: u.role });
     if (error) throw error;
   }
   console.log("auth users + user_hotels: ok");
